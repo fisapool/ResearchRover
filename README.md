@@ -151,15 +151,21 @@ The application provides RESTful API endpoints for data access:
 - **PATCH /api/notes/:id**: Update an existing note
 - **DELETE /api/notes/:id**: Delete a note
 
+- **Enhanced Text Analysis**: Advanced AI-powered analysis for deeper insights
 ## Future Enhancements
 
-- User authentication and multi-device synchronization
-- Additional citation styles
-- Enhanced text analysis capabilities
-- Collaborative research features
-- Integration with reference management software
+### High Priority
+- **PDF Annotation**: Direct annotation of PDF documents within the browser, allowing highlighting, commenting, and extracting information from research papers
+- **Data Visualization**: Tools for visualizing research data through interactive charts and graphs
+- **Enhanced Collaboration**: Robust collaboration features including shared note-taking, real-time editing, and version control
 
-## License
+### Additional Planned Features
+- **User Authentication & Multi-device Synchronization**: Cloud-based access to research materials across devices
+- **Advanced Search Capabilities**: Semantic search, related paper suggestions, and enhanced filtering
+- **Enhanced Text Analysis**: Advanced AI-powered analysis for deeper insights
+- **Integration with Reference Management Software**: Seamless workflow with popular reference managers
+- **Additional Citation Styles**: Support for more academic and publication styles
+
 
 MIT License
 
