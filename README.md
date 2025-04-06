@@ -61,8 +61,10 @@ A powerful research and note-taking application designed to enhance academic and
 - Authentication: Passport.js
 - Real-time: WebSocket
 - PDF Processing: PDF.js
-- Data Visualization: Chart.js
+- Data Visualization: Chart.js, D3.js
 - AI Integration: Custom API endpoints
+- Build Tools: Vite, TypeScript
+- Extension Framework: Chrome Extension Manifest V3
 
 ## Project Structure
 
@@ -70,6 +72,15 @@ A powerful research and note-taking application designed to enhance academic and
 ├── client/                  # Frontend application
 │   ├── src/
 │   │   ├── components/     # React components
+│   │   │   ├── AIAnalysis.tsx
+│   │   │   ├── Collaboration.tsx
+│   │   │   ├── DataVisualization.tsx
+│   │   │   ├── EnhancedSearch.tsx
+│   │   │   ├── MindMap.tsx
+│   │   │   ├── NoteEditor.tsx
+│   │   │   ├── NoteFolder.tsx
+│   │   │   ├── PDFViewer.tsx
+│   │   │   └── SyncManager.tsx
 │   │   ├── lib/           # Utility functions and types
 │   │   └── hooks/         # Custom React hooks
 ├── server/                 # Backend server
@@ -203,22 +214,28 @@ npm run build:extension
 ### Extension Features
 
 The Chrome extension provides quick access to:
-- Note creation and editing
-- PDF annotation
-- Text highlighting
-- AI analysis
-- Search functionality
-- Data visualization
+- Note creation and editing with rich text support
+- PDF annotation and highlighting
+- AI-powered text analysis and summarization
+- Advanced search with semantic capabilities
+- Interactive data visualization
+- Real-time collaboration
+- Mind map visualization
+- Cross-platform synchronization
+- Customizable settings and preferences
 
 ### Extension Settings
 
 1. Click the ResearchRover icon in your browser toolbar
 2. Access settings through the gear icon
 3. Configure:
-   - Auto-sync preferences
-   - Default visualization types
-   - AI analysis settings
-   - Collaboration preferences
+   - Auto-sync preferences and intervals
+   - Default visualization types and themes
+   - AI analysis settings and models
+   - Collaboration preferences and notifications
+   - PDF annotation defaults
+   - Search and filter preferences
+   - Mind map visualization options
 
 ### Troubleshooting
 
