@@ -5,27 +5,42 @@ A Chrome browser extension designed to enhance research workflows by providing q
 ## Current Features
 
 ### Text Highlighting
+- Highlight text directly from any web page with visual highlighting
+- Quick save option for capturing text without visual styling
 - View and manage saved text highlights
 - Search through your highlight collection
 - Delete highlights you no longer need
-- (Coming Soon) Highlight text directly from web pages
+- Offline support with synchronization when online
 
-### Basic Note Management
-- View existing research notes
-- Notes categorized for better organization
-- View note details including creation dates
-- (Coming Soon) Create and edit notes with rich formatting
+### Note Management
+- Create and edit notes with title, content, and category
+- Categorize notes (Important, Research, To Review, Citation, Ideas, Questions, General)
+- View note details including creation and update dates
+- Word count tracking for better content management
+- Full-text search capabilities for finding specific notes
 
 ### Database Integration
 - PostgreSQL database for persistent storage
 - RESTful API endpoints for data access and management
 - Secure data storage and retrieval
+- Offline functionality with local storage backup
 
 ### Research Tools
 - Tab-based interface for easy navigation
-- (Coming Soon) DOI validation and citation formatting
-- (Coming Soon) Text analysis capabilities
-- (Coming Soon) Export functionality for highlights and notes
+- DOI validation and citation formatting
+  - Supports multiple citation styles (APA, MLA, Chicago, Harvard, IEEE)
+  - Validates DOIs against CrossRef API
+  - Copy formatted citations to clipboard
+- Text analysis capabilities:
+  - Text summarization
+  - Key points extraction
+  - Research question generation
+  - Citation pattern detection
+- Export functionality in multiple formats:
+  - PDF (via HTML printing)
+  - Plain text (.txt)
+  - HTML
+  - CSV (for spreadsheet import)
 
 ## Technical Implementation
 
@@ -99,9 +114,12 @@ A Chrome browser extension designed to enhance research workflows by providing q
 4. To view saved notes:
    - Navigate to the Notes tab
    - Notes are organized by category
-5. To use research tools (coming soon):
+5. To use research tools:
    - Navigate to the Tools tab
-   - Choose the tool you need (DOI validation, text analysis, etc.)
+   - Choose the tool you need:
+     - DOI validation and citation formatting
+     - Text analysis (summarize, extract key points, generate research questions, find citations)
+     - Export (PDF, TXT, HTML, CSV)
 
 ## Privacy & Data Storage
 
