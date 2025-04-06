@@ -1,0 +1,95 @@
+design a realistic Chrome extension, focusing on achievable features and a practical development approach. 
+
+
+
+Core Purpose: To streamline the research process by providing essential tools within the browser, focusing on efficiency and accuracy.
+
+Realistic Feature Set (Phase 1):
+
+
+
+Smart Text Analysis (Basic):Functionality:Users can select text on a webpage.
+
+The extension offers a few core analysis templates: "Summarize," "Extract Key Points," and "Identify Potential Research Questions."
+
+Uses a reliable language model API to generate responses.
+
+Rationale: Provides immediate value without excessive complexity.
+
+DOI Validation and Basic Citation Formatting:Functionality:DOI validation: Checks if a DOI is valid using the CrossRef API.
+
+Basic citation formatting: Formats citations in APA style (initially).
+
+Allows for the user to copy the formated citation.
+
+Rationale: Addresses a common research need with a reliable data source.
+
+Simple Note-Taking:Functionality:A basic note-taking panel within the extension.
+
+Allows users to save selected text, AI responses, and formatted citations.
+
+Notes are saved locally within the browser's storage.
+
+Rationale: Provides a convenient way to store research findings without complex organization features.
+
+Technical Considerations:
+
+
+
+Language Model API:Use a cost-effective and reliable language model API.
+
+Implement efficient API request handling to minimize latency.
+
+CrossRef API:Utilize the CrossRef API for DOI validation and metadata retrieval.
+
+JavaScript Libraries:Use established JavaScript libraries for text manipulation, DOM interaction, and API handling.
+
+Chrome Storage API:Use the Chrome Storage API for local data storage.
+
+UI/UX:Design a clean and intuitive user interface.
+
+Prioritize ease of use and accessibility.
+
+Development Approach:
+
+
+
+Minimum Viable Product (MVP):Focus on implementing the core features (text analysis, DOI validation, note-taking) in a basic form.
+
+Prioritize functionality over advanced features.
+
+Iterative Development:Release the MVP and gather user feedback.
+
+Add features and improvements based on user input.
+
+Prioritize features that provide the most value to users.
+
+Focus on Reliability:Thoroughly test all features to ensure accuracy and stability.
+
+Implement error handling and provide clear feedback to users.
+
+Phased Feature Rollout:Phase 2: Add more citation styles, and improve the note taking function.
+
+Phase 3: Add more AI analysis templates.
+
+Realistic Limitations:
+
+
+
+Limited AI Capabilities: The AI analysis will be based on readily available language models, which may have limitations in accuracy and sophistication.
+
+Basic Citation Formatting: Initially, only a few core citation styles will be supported.
+
+Simple Note-Taking: The note-taking feature will be basic, without advanced organization or synchronization.
+
+No deep integration: We are focusing on building features into the extension, and not relying on heavy API integrations.
+
+Value Proposition:
+
+
+
+Provides essential research tools within the browser.
+
+Focuses on accuracy and efficiency.
+
+Offers a practical and user-friendly experience.
