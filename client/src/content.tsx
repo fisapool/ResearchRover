@@ -1,3 +1,8 @@
+/// <reference types="chrome"/>
+
+import React, { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+
 // Content script for the extension
 // This runs on webpages to provide highlighting functionality
 

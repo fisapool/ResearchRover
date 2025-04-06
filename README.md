@@ -1,119 +1,178 @@
-# ResearchAssist - Chrome Extension
+# ResearchRover
 
-A Chrome browser extension designed to enhance research workflows by providing quick access to essential research tools directly within the browser interface.
+A powerful research and note-taking application designed to enhance academic and research workflows with advanced features for organization, collaboration, and analysis.
 
 ## Features
 
-### Text Highlighting
+### Advanced Note Organization
+- Hierarchical folder structure for organizing notes
+- Tag-based categorization
+- Mind map visualization of note connections
+- Rich text editing with formatting options
+- Note linking and cross-referencing
 
-- Highlight important text on any webpage with a single click
-- Save and organize your highlights for later reference
-- Quickly access all saved highlights in the extension popup
+### PDF Annotation
+- PDF viewing and navigation
+- Text highlighting with multiple colors
+- Page-specific annotations
+- Export highlights to notes
+- Search within PDFs
 
-### Note-Taking
+### AI-Powered Analysis
+- Text summarization
+- Topic extraction
+- Sentiment analysis
+- Bias detection
+- Research question generation
 
-- Create and manage research notes within the browser
-- Organize notes by category
-- Link notes to specific web pages or research materials
+### Data Visualization
+- Interactive charts and graphs
+- Table data visualization
+- Multiple chart types (line, bar)
+- Export data in various formats (CSV, JSON, Excel)
+- Customizable visualization options
 
-### Research Tools
+### Enhanced Search
+- Semantic search capabilities
+- Advanced filtering options
+- Date range filtering
+- Tag-based filtering
+- Related paper suggestions
 
-#### DOI Validation & Citation
+### Cross-Platform Synchronization
+- Real-time data synchronization
+- Automatic sync scheduling
+- Conflict resolution
+- Progress tracking
+- Error handling
 
-- Validate Digital Object Identifiers (DOIs) using the CrossRef API
-- Generate properly formatted citations in multiple styles (APA, MLA, Chicago, Harvard)
-- Copy citations to clipboard with a single click
+### Collaboration Features
+- Real-time collaborative editing
+- Session management
+- Note sharing
+- Participant tracking
+- Version history
 
-#### Text Analysis
+## Technical Stack
 
-- Analyze selected text on webpages for:
-  - Summarization: Get concise summaries of lengthy texts
-  - Key Points: Extract the most important points
-  - Research Questions: Generate potential research questions based on the text
-  - Citations: Identify potential citations within the text
-
-#### Export
-
-- Export your research materials (highlights and notes) in multiple formats:
-  - PDF format for formal documentation
-  - Plain text format for maximum compatibility
-
-## User Interface
-
-### Highlights Panel
-View, search, and manage all your saved text highlights from across the web.
-
-### Notes Panel
-Create, organize, and access all your research notes in one place.
-
-### Tools Panel
-Access research tools including DOI validation, citation generation, text analysis, and more.
-
-## Technical Implementation
-
-- Built using modern web technologies (React, TypeScript, Tailwind CSS)
-- Uses Chrome Extension Manifest V3
-- Local storage for offline access to research materials
-- Content scripts for interaction with webpage content
+- Frontend: React, TypeScript, Tailwind CSS
+- Backend: Node.js, Express
+- Database: PostgreSQL with Drizzle ORM
+- Authentication: Passport.js
+- Real-time: WebSocket
+- PDF Processing: PDF.js
+- Data Visualization: Chart.js
+- AI Integration: Custom API endpoints
 
 ## Project Structure
 
 ```
-├── client/                  # Extension frontend code
-│   ├── public/              # Static assets and extension manifest
-│   └── src/                 # Source code
-│       ├── components/      # React components
-│       ├── lib/             # Utility functions
-│       └── hooks/           # Custom React hooks
-├── server/                  # Backend server (for development)
-└── shared/                  # Shared code/schemas
+├── client/                  # Frontend application
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   ├── lib/           # Utility functions and types
+│   │   └── hooks/         # Custom React hooks
+├── server/                 # Backend server
+│   ├── routes/            # API routes
+│   ├── models/            # Database models
+│   └── services/          # Business logic
+└── shared/                # Shared code and types
 ```
+
 ## Development Setup
 
 ### Prerequisites
 
 - Node.js (v20 or newer)
+- PostgreSQL
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository
+```bash
+git clone https://github.com/yourusername/researchrover.git
+cd researchrover
+```
+
 2. Install dependencies
-3. Start the development server
+```bash
+npm install
+```
 
-### Loading the Extension in Chrome
+3. Set up environment variables
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
 
-1. Build the extension
-2. Open Chrome and navigate to chrome://extensions/
-3. Enable "Developer mode" (toggle in the top-right corner)
-4. Click "Load unpacked" and select the dist directory from your project
-5. The extension should now be installed and visible in your browser toolbar
+4. Initialize the database
+```bash
+npm run db:push
+```
+
+5. Start the development server
+```bash
+npm run dev
+```
 
 ## Usage Guide
 
-1. Click the ResearchAssist icon in your browser toolbar to open the extension popup
-2. Use the tabs to navigate between Highlights, Notes, and Tools
-3. To highlight text on a webpage:
-   - Select text on any webpage
-   - Click the green floating button or use the "Highlight current selection" button
-4. To create a note:
-   - Navigate to the Notes tab
-   - Click "New Note" and fill in the details
-5. To use research tools:
-   - Navigate to the Tools tab
-   - Choose the tool you need (DOI validation, text analysis, etc.)
+1. **Note Management**
+   - Create and organize notes in folders
+   - Use tags for categorization
+   - Create links between related notes
+   - Visualize connections in the mind map
 
-## Privacy & Data Storage
+2. **PDF Handling**
+   - Upload and view PDFs
+   - Create highlights and annotations
+   - Export highlights to notes
+   - Search within PDF content
 
-All your research data (highlights, notes) is stored locally in your browser using Chrome storage API. No data is sent to external servers except when using the DOI validation feature, which queries the CrossRef API.
+3. **AI Analysis**
+   - Select text for analysis
+   - Choose analysis type (summary, topics, sentiment)
+   - View AI-generated insights
+   - Apply suggestions to notes
 
-## Future Enhancements
+4. **Data Visualization**
+   - Import data for visualization
+   - Choose visualization type
+   - Customize chart appearance
+   - Export visualizations
 
-- Cloud synchronization for research materials
-- Additional citation styles
-- Enhanced text analysis capabilities
-- Collaborative research features
-- Integration with reference management software
+5. **Search and Filter**
+   - Use semantic search for natural language queries
+   - Apply filters by date, tags, or folders
+   - View related papers and suggestions
+   - Save search results
+
+6. **Collaboration**
+   - Create collaboration sessions
+   - Invite participants
+   - Share notes and highlights
+   - Track changes in real-time
+
+## API Documentation
+
+The application exposes several RESTful endpoints:
+
+- `/api/notes` - Note management
+- `/api/folders` - Folder organization
+- `/api/highlights` - PDF highlights
+- `/api/analysis` - AI analysis
+- `/api/search` - Enhanced search
+- `/api/sync` - Data synchronization
+- `/api/collaboration` - Collaboration features
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
@@ -122,3 +181,50 @@ MIT License
 ## Contact
 
 For questions, feedback, or support, please open an issue on the GitHub repository.
+
+## Chrome Extension Installation
+
+### Building the Extension
+
+1. Build the extension package
+```bash
+npm run build:extension
+```
+
+2. The build process will create a `dist` directory containing the extension files.
+
+### Loading the Extension in Chrome
+
+1. Open Chrome and navigate to `chrome://extensions/`
+2. Enable "Developer mode" by toggling the switch in the top-right corner
+3. Click "Load unpacked" and select the `dist` directory from your project
+4. The ResearchRover extension should now be installed and visible in your browser toolbar
+
+### Extension Features
+
+The Chrome extension provides quick access to:
+- Note creation and editing
+- PDF annotation
+- Text highlighting
+- AI analysis
+- Search functionality
+- Data visualization
+
+### Extension Settings
+
+1. Click the ResearchRover icon in your browser toolbar
+2. Access settings through the gear icon
+3. Configure:
+   - Auto-sync preferences
+   - Default visualization types
+   - AI analysis settings
+   - Collaboration preferences
+
+### Troubleshooting
+
+If you encounter issues with the extension:
+1. Check the Chrome console for error messages
+2. Verify that all required permissions are granted
+3. Try reloading the extension
+4. Clear browser cache and reload
+5. Reinstall the extension if problems persist

@@ -1,34 +1,39 @@
 {
   "manifest_version": 3,
-  "name": "ResearchAssist",
+  "name": "ResearchRover",
   "version": "1.0.0",
-  "description": "Enhance your research with text highlighting, note-taking, and citation tools",
+  "description": "A powerful research and note-taking application with advanced features for organization, collaboration, and analysis",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
   "action": {
     "default_popup": "index.html",
-    "default_title": "ResearchAssist"
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
   },
   "permissions": [
     "storage",
-    "tabs",
     "activeTab",
-    "scripting"
+    "scripting",
+    "tabs",
+    "alarms"
   ],
   "host_permissions": [
-    "*://*/*"
+    "<all_urls>"
   ],
   "background": {
-    "service_worker": "src/background.ts",
+    "service_worker": "background.js",
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
-      "js": ["src/content.tsx"]
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
     }
   ]
 }
