@@ -10,8 +10,8 @@ import { Highlight } from '@shared/schema';
 import { ArrowLeft, ArrowRight, Download, Plus, Save, Trash } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
-// Initialize PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Import the PDF worker configuration
+import '@/lib/pdfWorker';
 
 interface PDFAnnotatorProps {
   onSaveHighlight?: (highlight: Omit<Highlight, 'id' | 'createdAt'>) => Promise<void>;

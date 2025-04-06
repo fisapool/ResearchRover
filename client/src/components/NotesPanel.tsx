@@ -98,6 +98,7 @@ const NotesPanel: React.FC = () => {
           title: noteTitle,
           content: noteContent,
           category: noteCategory,
+          userId: null, // Ensure userId is set to null, not undefined
         };
 
         const savedNote = await saveNote(newNote);

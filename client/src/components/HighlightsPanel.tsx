@@ -142,6 +142,7 @@ const HighlightsPanel: React.FC = () => {
                   title: highlightTitle,
                   text: selectedText,
                   source: highlightSource || window.location.href,
+                  userId: null, // Ensure userId is set to null, not undefined
                 };
             
                 const savedHighlight = await saveHighlight(newHighlight);
