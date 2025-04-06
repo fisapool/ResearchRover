@@ -1,189 +1,414 @@
 import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
-} from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line
+} from 'recharts';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown, Download, PieChart as PieChartIcon, BarChart2, LineChart as LineChartIcon } from 'lucide-react';
+import { Note, Highlight } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
 interface DataVisualizationProps {
-  data: any;
-  type: 'table' | 'chart';
-  onExport: (format: 'csv' | 'json' | 'excel') => void;
+  notes: Note[];
+  highlights: Highlight[];
 }
 
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    borderColor?: string;
-    backgroundColor?: string;
-  }[];
-}
+// Chart color palette
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-export const DataVisualization: React.FC<DataVisualizationProps> = ({
-  data,
-  type,
-  onExport,
-}) => {
-  const [chartType, setChartType] = useState<'line' | 'bar'>('line');
-  const [chartData, setChartData] = useState<ChartData | null>(null);
+// Simple export function
+const exportData = (data: any[], format: string, filename: string) => {
+  let content = '';
+  let mimeType = '';
+  let extension = '';
 
-  useEffect(() => {
-    if (type === 'chart' && data) {
-      // Transform data into chart format
-      // This is a simplified example - you would need to adapt this to your actual data structure
-      const transformedData: ChartData = {
-        labels: data.labels || [],
-        datasets: [
-          {
-            label: data.title || 'Data Series',
-            data: data.values || [],
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.5)',
-          },
-        ],
-      };
-      setChartData(transformedData);
+  if (format === 'csv') {
+    // Create CSV content
+    if (data.length > 0) {
+      const headers = Object.keys(data[0]).join(',');
+      const rows = data.map(item => Object.values(item).join(',')).join('\n');
+      content = `${headers}\n${rows}`;
     }
-  }, [data, type]);
+    mimeType = 'text/csv';
+    extension = 'csv';
+  } else if (format === 'json') {
+    // Create JSON content
+    content = JSON.stringify(data, null, 2);
+    mimeType = 'application/json';
+    extension = 'json';
+  }
 
-  const renderTable = () => {
-    if (!data || !data.headers || !data.rows) return null;
+  // Create and trigger download
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${filename}.${extension}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
 
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {data.headers.map((header: string, index: number) => (
-                <th
-                  key={index}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {data.rows.map((row: any[], rowIndex: number) => (
-              <tr key={rowIndex}>
-                {row.map((cell: any, cellIndex: number) => (
-                  <td
-                    key={cellIndex}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                  >
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
+export const DataVisualization: React.FC<DataVisualizationProps> = ({ notes, highlights }) => {
+  const [activeChart, setActiveChart] = useState<'bar' | 'pie' | 'line'>('bar');
+  const [activeDataType, setActiveDataType] = useState<'categories' | 'timeline' | 'wordCount' | 'sources'>('categories');
+  const { toast } = useToast();
+
+  // Prepare data for charts
+  const getCategoryData = () => {
+    const categories: Record<string, number> = {};
+    
+    notes.forEach(note => {
+      const category = note.category || 'Uncategorized';
+      categories[category] = (categories[category] || 0) + 1;
+    });
+    
+    return Object.entries(categories).map(([name, value]) => ({ name, value }));
   };
 
+  const getTimelineData = () => {
+    const months: Record<string, { notes: number, highlights: number }> = {};
+    
+    // Process notes
+    notes.forEach(note => {
+      const date = new Date(note.createdAt);
+      const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      
+      if (!months[monthYear]) {
+        months[monthYear] = { notes: 0, highlights: 0 };
+      }
+      
+      months[monthYear].notes += 1;
+    });
+    
+    // Process highlights
+    highlights.forEach(highlight => {
+      const date = new Date(highlight.createdAt);
+      const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      
+      if (!months[monthYear]) {
+        months[monthYear] = { notes: 0, highlights: 0 };
+      }
+      
+      months[monthYear].highlights += 1;
+    });
+    
+    // Convert to array and sort by date
+    return Object.entries(months)
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => {
+        const [aMonth, aYear] = a.name.split('/').map(Number);
+        const [bMonth, bYear] = b.name.split('/').map(Number);
+        return (aYear * 12 + aMonth) - (bYear * 12 + bMonth);
+      });
+  };
+
+  const getWordCountData = () => {
+    // Create ranges for word counts
+    const ranges = [
+      { min: 0, max: 50, label: '0-50' },
+      { min: 51, max: 100, label: '51-100' },
+      { min: 101, max: 200, label: '101-200' },
+      { min: 201, max: 500, label: '201-500' },
+      { min: 501, max: Infinity, label: '500+' }
+    ];
+    
+    const countByRange: Record<string, number> = {};
+    ranges.forEach(range => {
+      countByRange[range.label] = 0;
+    });
+    
+    // Count notes in each range
+    notes.forEach(note => {
+      const wordCount = note.content.split(/\s+/).filter(Boolean).length;
+      const range = ranges.find(r => wordCount >= r.min && wordCount <= r.max);
+      if (range) {
+        countByRange[range.label]++;
+      }
+    });
+    
+    return Object.entries(countByRange).map(([name, value]) => ({ name, value }));
+  };
+
+  const getSourceData = () => {
+    const sources: Record<string, number> = {};
+    
+    highlights.forEach(highlight => {
+      const source = highlight.source || 'Unknown';
+      sources[source] = (sources[source] || 0) + 1;
+    });
+    
+    return Object.entries(sources)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value) // Sort by count descending
+      .slice(0, 10); // Top 10 sources
+  };
+
+  // Get the appropriate data based on activeDataType
+  const getChartData = () => {
+    switch (activeDataType) {
+      case 'categories':
+        return getCategoryData();
+      case 'timeline':
+        return getTimelineData();
+      case 'wordCount':
+        return getWordCountData();
+      case 'sources':
+        return getSourceData();
+      default:
+        return [];
+    }
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    const data = getChartData();
+    const filename = `research_data_${activeDataType}_${new Date().toISOString().slice(0, 10)}`;
+    exportData(data, format, filename);
+    
+    toast({
+      title: "Data exported",
+      description: `Successfully exported ${activeDataType} data as ${format.toUpperCase()}`
+    });
+  };
+
+  // Get chart title
+  const getChartTitle = () => {
+    switch (activeDataType) {
+      case 'categories':
+        return 'Notes by Category';
+      case 'timeline':
+        return 'Research Activity Timeline';
+      case 'wordCount':
+        return 'Notes by Word Count';
+      case 'sources':
+        return 'Top Highlight Sources';
+      default:
+        return '';
+    }
+  };
+
+  // Render the appropriate chart based on activeChart
   const renderChart = () => {
-    if (!chartData) return null;
+    const data = getChartData();
+    
+    if (data.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-64 text-gray-500">
+          No data available for visualization
+        </div>
+      );
+    }
 
-    const options = {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'top' as const,
-        },
-        title: {
-          display: true,
-          text: data.title || 'Chart',
-        },
-      },
-    };
+    switch (activeChart) {
+      case 'bar':
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              {activeDataType === 'timeline' ? (
+                <>
+                  <Bar dataKey="notes" fill="#0088FE" name="Notes" />
+                  <Bar dataKey="highlights" fill="#00C49F" name="Highlights" />
+                </>
+              ) : (
+                <Bar dataKey="value" fill="#0088FE" name="Count" />
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        );
 
-    return (
-      <div className="w-full h-96">
-        {chartType === 'line' ? (
-          <Line options={options} data={chartData} />
-        ) : (
-          <Bar options={options} data={chartData} />
-        )}
-      </div>
-    );
+      case 'pie':
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                labelLine={true}
+                outerRadius={150}
+                fill="#8884d8"
+                dataKey="value"
+                nameKey="name"
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value, name, props) => [value, props.payload.name]} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+
+      case 'line':
+        if (activeDataType === 'timeline') {
+          return (
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="notes" stroke="#0088FE" name="Notes" />
+                <Line type="monotone" dataKey="highlights" stroke="#00C49F" name="Highlights" />
+              </LineChart>
+            </ResponsiveContainer>
+          );
+        } else {
+          return (
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="value" stroke="#0088FE" name="Count" />
+              </LineChart>
+            </ResponsiveContainer>
+          );
+        }
+
+      default:
+        return null;
+    }
   };
+
+  // Chart switcher component
+  const ChartTypeSwitcher = () => (
+    <div className="flex space-x-2">
+      <Button
+        variant={activeChart === 'bar' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setActiveChart('bar')}
+      >
+        <BarChart2 className="h-4 w-4 mr-2" />
+        Bar
+      </Button>
+      <Button
+        variant={activeChart === 'pie' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setActiveChart('pie')}
+      >
+        <PieChartIcon className="h-4 w-4 mr-2" />
+        Pie
+      </Button>
+      <Button
+        variant={activeChart === 'line' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setActiveChart('line')}
+      >
+        <LineChartIcon className="h-4 w-4 mr-2" />
+        Line
+      </Button>
+    </div>
+  );
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-lg">
-      <div className="mb-4 flex justify-between items-center">
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Research Data Visualization</h2>
+        
         <div className="flex gap-2">
-          {type === 'chart' && (
-            <>
-              <button
-                onClick={() => setChartType('line')}
-                className={`px-4 py-2 rounded ${
-                  chartType === 'line'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                Line Chart
-              </button>
-              <button
-                onClick={() => setChartType('bar')}
-                className={`px-4 py-2 rounded ${
-                  chartType === 'bar'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                Bar Chart
-              </button>
-            </>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onExport('csv')}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            Export CSV
-          </button>
-          <button
-            onClick={() => onExport('json')}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Export JSON
-          </button>
-          <button
-            onClick={() => onExport('excel')}
-            className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
-          >
-            Export Excel
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleExport('csv')}>
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('json')}>
+                Export as JSON
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <ChartTypeSwitcher />
         </div>
       </div>
-
-      <div className="mt-4">
-        {type === 'table' ? renderTable() : renderChart()}
+      
+      <Tabs defaultValue="categories" onValueChange={(v) => setActiveDataType(v as any)}>
+        <TabsList className="grid grid-cols-4">
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="wordCount">Word Count</TabsTrigger>
+          <TabsTrigger value="sources">Sources</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="categories">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-medium mb-4">{getChartTitle()}</h3>
+              {renderChart()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="timeline">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-medium mb-4">{getChartTitle()}</h3>
+              {renderChart()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="wordCount">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-medium mb-4">{getChartTitle()}</h3>
+              {renderChart()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="sources">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-medium mb-4">{getChartTitle()}</h3>
+              {renderChart()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      <div className="text-sm text-gray-500 mt-2">
+        Visualize your research data to identify patterns and track progress over time.
       </div>
     </div>
   );
-}; 
+};
+
+export default DataVisualization;
