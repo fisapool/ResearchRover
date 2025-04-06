@@ -94,11 +94,11 @@ const NotesPanel: React.FC = () => {
         }
       } else {
         // Create new note
-        const newNote: Omit<InsertNote, 'id' | 'createdAt' | 'updatedAt'> = {
+        const newNote = {
           title: noteTitle,
           content: noteContent,
           category: noteCategory,
-          userId: null, // Ensure userId is set to null, not undefined
+          userId: null as number | null, // Ensure userId is set to null, not undefined
         };
 
         const savedNote = await saveNote(newNote);

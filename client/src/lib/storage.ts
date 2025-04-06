@@ -22,7 +22,18 @@ const getFromStorage = async <T>(key: string): Promise<T> => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       } else {
-        resolve(result[key] as T);
+        // Convert string dates to Date objects for client-side use
+        const data = result[key];
+        if (Array.isArray(data)) {
+          const processed = data.map(item => {
+            if (item.createdAt) item.createdAt = new Date(item.createdAt);
+            if (item.updatedAt) item.updatedAt = new Date(item.updatedAt);
+            return item;
+          });
+          resolve(processed as T);
+        } else {
+          resolve(data as T);
+        }
       }
     });
   });
@@ -79,7 +90,7 @@ export const getHighlight = async (id: number): Promise<Highlight | undefined> =
   }
 };
 
-export const saveHighlight = async (highlight: Omit<Highlight, 'id' | 'createdAt'>): Promise<Highlight> => {
+export const saveHighlight = async (highlight: { title: string; text: string; source: string; userId: number | null }): Promise<Highlight> => {
   if (useApiStorage) {
     const response = await apiRequest('POST', '/api/highlights', highlight);
     return await response.json();
@@ -92,7 +103,7 @@ export const saveHighlight = async (highlight: Omit<Highlight, 'id' | 'createdAt
     const newHighlight: Highlight = {
       ...highlight,
       id: newId,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
     
     await setInStorage(STORAGE_KEYS.HIGHLIGHTS, [...highlights, newHighlight]);
@@ -179,7 +190,7 @@ export const getNote = async (id: number): Promise<Note | undefined> => {
   }
 };
 
-export const saveNote = async (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Promise<Note> => {
+export const saveNote = async (note: { title: string; content: string; category: string; userId: number | null }): Promise<Note> => {
   if (useApiStorage) {
     const response = await apiRequest('POST', '/api/notes', note);
     return await response.json();
@@ -188,7 +199,7 @@ export const saveNote = async (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'
     
     // Generate new ID
     const newId = notes.length ? Math.max(...notes.map(n => n.id)) + 1 : 1;
-    const now = new Date().toISOString();
+    const now = new Date();
     
     const newNote: Note = {
       ...note,
@@ -220,7 +231,7 @@ export const updateNote = async (id: number, data: Partial<Note>): Promise<Note 
     const updatedNote = { 
       ...notes[index], 
       ...data,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     };
     
     notes[index] = updatedNote;

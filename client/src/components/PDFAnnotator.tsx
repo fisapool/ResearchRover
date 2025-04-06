@@ -12,6 +12,7 @@ import { apiRequest } from '@/lib/queryClient';
 
 // Import the PDF worker configuration
 import '@/lib/pdfWorker';
+import useWebSocket, { ReadyState } from '@/lib/useWebSocket';
 
 interface PDFAnnotatorProps {
   onSaveHighlight?: (highlight: Omit<Highlight, 'id' | 'createdAt'>) => Promise<void>;
@@ -41,6 +42,50 @@ export const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({ onSaveHighlight }) =
   
   const documentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  
+  // WebSocket connection for real-time PDF annotations
+  const { lastMessage, readyState, sendMessage } = useWebSocket('/pdf-ws');
+  
+  // Handle WebSocket messages
+  useEffect(() => {
+    if (lastMessage) {
+      try {
+        const data = JSON.parse(lastMessage.data);
+        console.log('Received WebSocket message:', data);
+        
+        // Handle different message types
+        switch (data.type) {
+          case 'annotations:init':
+            if (data.annotations && Array.isArray(data.annotations)) {
+              setAnnotations(data.annotations);
+            }
+            break;
+          
+          case 'annotation:created':
+            if (data.annotation) {
+              setAnnotations(prev => [...prev, data.annotation]);
+            }
+            break;
+            
+          case 'annotation:updated':
+            if (data.annotation) {
+              setAnnotations(prev => 
+                prev.map(a => a.id === data.annotation.id ? data.annotation : a)
+              );
+            }
+            break;
+            
+          case 'annotation:deleted':
+            if (data.annotationId) {
+              setAnnotations(prev => prev.filter(a => a.id !== data.annotationId));
+            }
+            break;
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    }
+  }, [lastMessage]);
 
   // Handle file upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,6 +105,15 @@ export const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({ onSaveHighlight }) =
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setPageNumber(1);
+    
+    // Initialize WebSocket connection for this PDF
+    if (readyState === ReadyState.OPEN && fileUrl) {
+      sendMessage(JSON.stringify({
+        type: 'init',
+        pdfUrl: fileUrl
+      }));
+    }
+    
     toast({
       title: "PDF loaded successfully",
       description: `Document has ${numPages} pages`,
@@ -123,6 +177,7 @@ export const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({ onSaveHighlight }) =
       text: selectedText
     };
 
+    // Update local state
     setAnnotations([...annotations, newAnnotation]);
     setSelectedAnnotation(newAnnotation);
     
@@ -130,6 +185,15 @@ export const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({ onSaveHighlight }) =
     window.getSelection()?.removeAllRanges();
     setSelectionRect(null);
     setSelectedText('');
+    
+    // Send via WebSocket if connection is open
+    if (readyState === ReadyState.OPEN && fileUrl) {
+      sendMessage(JSON.stringify({
+        type: 'annotation:create',
+        annotation: newAnnotation,
+        pdfUrl: fileUrl
+      }));
+    }
 
     toast({
       title: "Annotation created",
@@ -146,16 +210,37 @@ export const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({ onSaveHighlight }) =
       a.id === selectedAnnotation.id ? updatedAnnotation : a
     );
     
+    // Update local state
     setSelectedAnnotation(updatedAnnotation);
     setAnnotations(updatedAnnotations);
+    
+    // Send update via WebSocket if connection is open
+    if (readyState === ReadyState.OPEN && fileUrl) {
+      sendMessage(JSON.stringify({
+        type: 'annotation:update',
+        annotation: updatedAnnotation,
+        pdfUrl: fileUrl
+      }));
+    }
   };
 
   // Delete annotation
   const deleteAnnotation = (id: string) => {
+    // Update local state
     setAnnotations(annotations.filter(a => a.id !== id));
     if (selectedAnnotation?.id === id) {
       setSelectedAnnotation(null);
     }
+    
+    // Send delete request via WebSocket if connection is open
+    if (readyState === ReadyState.OPEN && fileUrl) {
+      sendMessage(JSON.stringify({
+        type: 'annotation:delete',
+        annotationId: id,
+        pdfUrl: fileUrl
+      }));
+    }
+    
     toast({
       title: "Annotation deleted",
     });
@@ -229,7 +314,25 @@ export const PDFAnnotator: React.FC<PDFAnnotatorProps> = ({ onSaveHighlight }) =
   return (
     <div className="flex flex-col h-full w-full gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">PDF Annotator</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold">PDF Annotator</h2>
+          <div 
+            className={`h-2 w-2 rounded-full ${
+              readyState === ReadyState.OPEN 
+                ? 'bg-green-500' 
+                : readyState === ReadyState.CONNECTING 
+                  ? 'bg-yellow-500' 
+                  : 'bg-red-500'
+            }`} 
+            title={
+              readyState === ReadyState.OPEN 
+                ? 'Connected' 
+                : readyState === ReadyState.CONNECTING 
+                  ? 'Connecting' 
+                  : 'Disconnected'
+            }
+          />
+        </div>
         <div className="flex gap-2">
           <Input 
             type="file" 

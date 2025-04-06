@@ -138,11 +138,11 @@ const HighlightsPanel: React.FC = () => {
             async () => {
               try {
                 // Save the highlight to the database
-                const newHighlight: Omit<InsertHighlight, 'id'> = {
+                const newHighlight = {
                   title: highlightTitle,
                   text: selectedText,
                   source: highlightSource || window.location.href,
-                  userId: null, // Ensure userId is set to null, not undefined
+                  userId: null as number | null, // Ensure userId is set to null, not undefined
                 };
             
                 const savedHighlight = await saveHighlight(newHighlight);

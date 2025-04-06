@@ -5,6 +5,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertHighlightSchema, insertNoteSchema } from "@shared/schema";
+import crypto from 'crypto';
 
 // WebSocket connection store
 interface ConnectedClient {
@@ -399,13 +400,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Socket disconnected:', socket.id);
       
       // Find and update user status
-      for (const [id, user] of onlineUsers.entries()) {
+      // Convert Map entries to array for iteration to avoid MapIterator issues
+      Array.from(onlineUsers.entries()).forEach(([id, user]) => {
         // In a real app, we'd have a way to associate socket ID with user ID
         // Here, we're just marking all users offline on disconnect for simplicity
         user.isOnline = false;
         user.lastActive = new Date();
         onlineUsers.set(id, user);
-      }
+      });
       
       // Broadcast updated users list
       io.emit('users:online', Array.from(onlineUsers.values()));
@@ -546,6 +548,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Helper to broadcast messages to all clients viewing a specific PDF
   function broadcastToPdfClients(pdfUrl: string, message: any) {
+    // Send to all clients regardless of PDF URL for now
+    // In a real app, we would filter by clients viewing this specific PDF
     for (const client of pdfClients) {
       if (client.socket.readyState === WebSocket.OPEN) {
         client.socket.send(JSON.stringify(message));
